@@ -72,7 +72,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Segoe UI','SF Pro 
 .btn-success{background:var(--btn-success);color:#fff}
 .btn-success:hover{background:var(--btn-success-hover)}
 .btn-sm{padding:7px 14px;font-size:12px;border-radius:8px}
-.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
 
 #adminPanel{position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all .3s ease}
 #adminPanel.active{opacity:1;visibility:visible}
@@ -158,22 +157,15 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Segoe UI','SF Pro 
 .bg-mode-btn.active{background:var(--accent);color:#fff}
 .bg-mode-btn:hover:not(.active){background:var(--glass-bg);color:var(--fg)}
 
-.sync-indicator{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);padding:4px 10px;border-radius:6px;background:var(--glass-bg);margin-left:auto}
-.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--btn-success);animation:pulse 2s infinite}
-.sync-dot.off{background:var(--btn-danger);animation:none}
-.sync-dot.loading{background:var(--accent);animation:pulse .8s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.code-block{background:var(--input-bg);border:1px solid var(--input-border);border-radius:10px;padding:14px;font-family:'Consolas','Monaco',monospace;font-size:12px;color:var(--accent);line-height:1.7;overflow-x:auto;white-space:pre;max-height:200px;overflow-y:auto;margin:10px 0}
+.code-block .ck{color:var(--btn-success)}
+.code-block .cv{color:#e8a87c}
+.code-block .cc{color:var(--muted);font-style:italic}
 
-.setup-card{background:var(--panel-card);border:1px solid var(--input-border);border-radius:14px;padding:20px;margin-bottom:16px}
-.setup-card h3{font-size:14px;font-weight:700;color:var(--fg);margin-bottom:4px}
-.setup-card p{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px}
-.setup-card ol{font-size:12px;color:var(--muted);line-height:2;padding-left:20px;margin-bottom:12px}
-.setup-card .warn{color:var(--btn-danger);font-weight:600;font-size:11px;margin-top:8px}
-
-.secret-url-box{background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.3);border-radius:10px;padding:12px 14px;margin-top:10px}
-.secret-url-box .field-label{color:var(--btn-danger);margin-bottom:8px}
-.secret-url-box code{display:block;word-break:break-all;font-size:11px;color:var(--fg);background:var(--input-bg);padding:10px;border-radius:8px;line-height:1.6}
-.secret-url-box .btn-row{margin-top:10px}
+.info-card{background:var(--panel-card);border:1px solid var(--input-border);border-radius:14px;padding:20px;margin-bottom:16px}
+.info-card h3{font-size:14px;font-weight:700;color:var(--fg);margin-bottom:8px}
+.info-card p{font-size:12px;color:var(--muted);line-height:1.7}
+.info-card ol{font-size:12px;color:var(--muted);line-height:2;padding-left:20px;margin-top:8px}
 
 @media(max-width:640px){
   .admin-container{width:98%;max-height:92vh;border-radius:16px}
@@ -185,7 +177,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Segoe UI','SF Pro 
   #ctaBtn{padding:12px 24px;font-size:14px;border-radius:12px}
   #toastWrap{bottom:16px;right:16px;left:16px}
   .toast{max-width:100%}
-  .sync-indicator{display:none}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
@@ -226,10 +217,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Segoe UI','SF Pro 
   <div class="admin-container">
     <div class="admin-header">
       <h2>&#9881; Panel Admin</h2>
-      <div style="display:flex;align-items:center;gap:8px">
-        <div class="sync-indicator"><span class="sync-dot off" id="syncDot"></span><span id="syncText">Offline</span></div>
-        <button class="admin-close" id="adminClose" aria-label="Tutup panel">&times;</button>
-      </div>
+      <button class="admin-close" id="adminClose" aria-label="Tutup panel">&times;</button>
     </div>
     <div class="admin-tabs" role="tablist">
       <button class="tab-btn active" data-tab="tabBg" role="tab" aria-selected="true">Background</button>
@@ -238,9 +226,8 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Segoe UI','SF Pro 
       <button class="tab-btn" data-tab="tabFilter" role="tab" aria-selected="false">Filter</button>
       <button class="tab-btn" data-tab="tabTheme" role="tab" aria-selected="false">Tema</button>
       <button class="tab-btn" data-tab="tabColors" role="tab" aria-selected="false">Warna</button>
-      <button class="tab-btn" data-tab="tabCloud" role="tab" aria-selected="false">Cloud</button>
+      <button class="tab-btn" data-tab="tabExport" role="tab" aria-selected="false">Export</button>
       <button class="tab-btn" data-tab="tabSecurity" role="tab" aria-selected="false">Keamanan</button>
-      <button class="tab-btn" data-tab="tabBackup" role="tab" aria-selected="false">Backup</button>
     </div>
     <div class="admin-body">
 
@@ -252,7 +239,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Segoe UI','SF Pro 
           <button class="bg-mode-btn" data-mode="upload">Upload Lokal</button>
         </div>
         <div id="bgUrlMode">
-          <div class="field-group"><label class="field-label">URL Gambar (langsung ke file)</label><input class="field-input" id="bgUrl" placeholder="https://i.imgur.com/RAdbQiS.png"></div>
+          <div class="field-group"><label class="field-label">URL Gambar (langsung ke file)</label><input class="field-input" id="bgUrl" placeholder="https://i.imgur.com/xxxxx.jpg"></div>
           <div class="btn-row"><button class="btn btn-primary btn-sm" id="btnApplyUrl">Terapkan</button><button class="btn btn-ghost btn-sm" id="btnTestUrl">Test URL</button></div>
           <div class="img-preview" id="urlPreview" style="display:none"><img id="urlPreviewImg" alt="Preview"></div>
         </div>
@@ -260,7 +247,7 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Segoe UI','SF Pro 
           <div class="dropzone" id="dropzone"><div class="dropzone-icon">&#128247;</div><div class="dropzone-text">Seret gambar ke sini atau <strong>klik untuk pilih</strong><br>PNG, WEBP, JPG, JPEG, SVG, GIF (maks 5MB)</div><input type="file" id="fileInput" accept="image/*" aria-label="Pilih file gambar"></div>
           <div class="img-preview" id="imgPreview" style="display:none"><img id="previewImg" alt="Preview"></div>
           <div class="btn-row" style="margin-top:14px"><button class="btn btn-primary btn-sm" id="btnCrop">Crop Sederhana</button><button class="btn btn-danger btn-sm" id="btnDeleteBg">Hapus Lokal</button></div>
-          <p style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5">&#9888;&#65039; Upload lokal hanya di browser ini. Untuk dilihat semua orang, gunakan URL Eksternal lalu Simpan ke Cloud.</p>
+          <p style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5">&#9888;&#65039; Upload lokal hanya di browser ini. Untuk dilihat semua orang, gunakan URL Eksternal lalu Export Kode.</p>
         </div>
         <div class="section-title" style="margin-top:22px">Posisi & Ukuran</div>
         <div class="field-group"><label class="field-label">object-position</label><select class="field-select" id="bgPosition"><option value="center center">Center</option><option value="top center">Top</option><option value="bottom center">Bottom</option><option value="left center">Left</option><option value="right center">Right</option><option value="top left">Top Left</option><option value="top right">Top Right</option><option value="bottom left">Bottom Left</option><option value="bottom right">Bottom Right</option></select></div>
@@ -318,50 +305,33 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Segoe UI','SF Pro 
         <div class="btn-row"><button class="btn btn-ghost btn-sm" id="btnResetColors">Reset Warna</button></div>
       </div>
 
-      <!-- CLOUD -->
-      <div class="tab-content" id="tabCloud" role="tabpanel">
-        <div class="section-title">Cloud Sync (npoint.io)</div>
-        <div class="setup-card">
-          <h3>Cara kerja</h3>
-          <p>Data konfigurasi disimpan di npoint.io. Pengunjung bisa <strong>membaca</strong> data, tapi hanya Anda yang bisa <strong>mengubah</strong> menggunakan Secret URL.</p>
+      <!-- EXPORT KODE -->
+      <div class="tab-content" id="tabExport" role="tabpanel">
+        <div class="section-title">Export Kode HTML</div>
+        <div class="info-card">
+          <h3>Cara Kerja</h3>
+          <p>Klik tombol di bawah untuk menghasilkan <strong>kode CONFIG</strong>. Lalu:</p>
+          <ol>
+            <li>Buka file HTML ini di GitHub (klik icon pencil / edit)</li>
+            <li>Cari bagian <strong>"// === KONFIGURASI — EDIT DI SINI ==="</strong></li>
+            <li>Ganti kode config lama dengan yang baru</li>
+            <li>Klik <strong>Commit changes</strong></li>
+            <li>Selesai! Semua pengunjung akan melihat perubahan</li>
+          </ol>
         </div>
-
-        <div id="cloudSetupArea">
-          <div class="btn-row" style="margin-bottom:18px">
-            <button class="btn btn-primary" id="btnCreateCloud" style="flex:1">Buat Cloud Baru (1 klik)</button>
-          </div>
-          <p style="font-size:11px;color:var(--muted);line-height:1.6">Klik tombol di atas, tunggu sebentar. Read URL dan Secret URL akan muncul otomatis. Tidak perlu daftar akun apapun.</p>
+        <div class="btn-row" style="margin-bottom:14px">
+          <button class="btn btn-primary" id="btnGenCode" style="flex:1">Generate Kode Config</button>
+          <button class="btn btn-success btn-sm" id="btnCopyCode">Copy</button>
         </div>
+        <div class="code-block" id="codeOutput"><span class="cc">// Klik "Generate Kode Config" untuk melihat kode yang harus ditempel di file HTML</span></div>
 
-        <div id="cloudInfoArea" style="display:none">
-          <div class="field-group">
-            <label class="field-label">Read URL (untuk pengunjung)</label>
-            <input class="field-input" id="cloudReadUrl" readonly style="font-size:11px;color:var(--muted)">
-          </div>
-          <div class="secret-url-box">
-            <div class="field-label">&#128274; Secret URL (HANYA UNTUK ADMIN)</div>
-            <code id="cloudSecretDisplay">...</code>
-            <div class="btn-row">
-              <button class="btn btn-ghost btn-sm" id="btnCopySecret">Copy Secret URL</button>
-              <button class="btn btn-ghost btn-sm" id="btnPasteSecret">Paste dari Clipboard</button>
-            </div>
-            <p class="warn">&#9888;&#65039; Jangan bagikan Secret URL ke siapa pun. Siapa pun yang punya URL ini bisa mengubah data Anda.</p>
-          </div>
-        </div>
-
-        <div class="section-title" style="margin-top:22px">Aksi</div>
+        <div class="section-title" style="margin-top:22px">Backup / Restore Lokal</div>
         <div class="btn-row">
-          <button class="btn btn-primary btn-sm" id="btnCloudSave">Simpan ke Cloud</button>
-          <button class="btn btn-success btn-sm" id="btnCloudLoad">Ambil dari Cloud</button>
-        </div>
-
-        <div class="section-title" style="margin-top:22px">Auto Sync</div>
-        <div class="field-group"><div class="toggle-wrap"><label class="toggle"><input type="checkbox" id="cloudAutoSync"><span class="toggle-track"></span><span class="toggle-knob"></span></label><span class="toggle-label">Auto-load dari cloud saat halaman dibuka</span></div></div>
-        <div class="field-group"><div class="toggle-wrap"><label class="toggle"><input type="checkbox" id="cloudAutoSave"><span class="toggle-track"></span><span class="toggle-knob"></span></label><span class="toggle-label">Auto-save ke cloud setiap perubahan</span></div></div>
-
-        <div class="setup-card" style="margin-top:18px">
-          <h3>Pindah Perangkat?</h3>
-          <p>Jika Anda buka admin dari perangkat lain, klik <strong>"Paste dari Clipboard"</strong> lalu paste Secret URL Anda. Semua data akan muncul.</p>
+          <button class="btn btn-ghost btn-sm" id="btnExportJson">Export JSON</button>
+          <button class="btn btn-ghost btn-sm" id="btnImportJson">Import JSON</button>
+          <input type="file" id="importFile" accept=".json" style="display:none">
+          <button class="btn btn-danger btn-sm" id="btnFactoryReset">Reset Factory</button>
+          <button class="btn btn-ghost btn-sm" id="btnUndo">Undo</button>
         </div>
       </div>
 
@@ -377,16 +347,6 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Segoe UI','SF Pro 
         <div class="btn-row"><button class="btn btn-danger btn-sm" id="btnLogout">Logout</button></div>
       </div>
 
-      <!-- BACKUP -->
-      <div class="tab-content" id="tabBackup" role="tabpanel">
-        <div class="section-title">Export / Import</div>
-        <div class="btn-row" style="margin-bottom:16px"><button class="btn btn-primary btn-sm" id="btnExport">Export JSON</button><button class="btn btn-success btn-sm" id="btnImport">Import JSON</button><input type="file" id="importFile" accept=".json" style="display:none"></div>
-        <div class="section-title">Backup Lengkap</div>
-        <div class="btn-row" style="margin-bottom:16px"><button class="btn btn-primary btn-sm" id="btnBackup">Backup Data</button><button class="btn btn-success btn-sm" id="btnRestore">Restore</button><input type="file" id="restoreFile" accept=".json" style="display:none"></div>
-        <div class="section-title">Danger Zone</div>
-        <div class="btn-row"><button class="btn btn-danger btn-sm" id="btnFactoryReset">Reset Factory</button><button class="btn btn-ghost btn-sm" id="btnUndo">Undo</button></div>
-      </div>
-
     </div>
   </div>
 </div>
@@ -396,22 +356,49 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:'Segoe UI','SF Pro 
 <div id="toastWrap" aria-live="polite"></div>
 
 <script>
-/* ===== DEFAULTS ===== */
-var DEFAULTS={
-  bgMode:'url',bgUrl:'',bgImage:'',bgPosition:'center center',bgFit:'cover',bgRepeat:'no-repeat',
-  overlayColor:'#000000',overlayOpacity:30,
-  filterBright:100,filterContrast:100,filterBlur:0,filterGray:0,filterSat:100,filterOpacity:100,
-  ctaText:'Kunjungi Website',ctaIcon:'\u2197',ctaUrl:'https://example.com',ctaTarget:'_blank',
-  ctaFontSize:15,ctaRadius:14,ctaPaddingV:14,ctaPaddingH:32,ctaPosition:'bottom-center',ctaEnabled:true,
-  theme:'dark',themeAuto:false,
-  colorAccent:'#c9a84c',colorAccentHover:'#dbb95d',colorFg:'#f5f5f5',colorBg:'#0a0a0a',colorMuted:'#8a8a8a',
-  idleTimeout:15,
-  cloudReadUrl:'',cloudSecretUrl:'',cloudAutoSync:false,cloudAutoSave:false
+/* =============================================================
+   // === KONFIGURASI — EDIT DI SINI ===
+   // Ubah nilai-nilai di bawah ini, lalu commit ke GitHub.
+   // Semua pengunjung akan melihat perubahan setelah refresh.
+   // ============================================================= */
+var HARD_CODED = {
+  bgMode: 'url',
+  bgUrl: '',
+  bgPosition: 'center center',
+  bgFit: 'cover',
+  bgRepeat: 'no-repeat',
+  overlayColor: '#000000',
+  overlayOpacity: 30,
+  filterBright: 100,
+  filterContrast: 100,
+  filterBlur: 0,
+  filterGray: 0,
+  filterSat: 100,
+  filterOpacity: 100,
+  ctaText: 'Kunjungi Website',
+  ctaIcon: '\u2197',
+  ctaUrl: 'https://example.com',
+  ctaTarget: '_blank',
+  ctaFontSize: 15,
+  ctaRadius: 14,
+  ctaPaddingV: 14,
+  ctaPaddingH: 32,
+  ctaPosition: 'bottom-center',
+  ctaEnabled: true,
+  theme: 'dark',
+  themeAuto: false,
+  colorAccent: '#c9a84c',
+  colorAccentHover: '#dbb95d',
+  colorFg: '#f5f5f5',
+  colorBg: '#0a0a0a',
+  colorMuted: '#8a8a8a',
+  idleTimeout: 15
 };
+/* ============================================================= */
 
 /* ===== STATE ===== */
 var config={},isAdmin=false,clickCount=0,clickTimer=null,idleTimer=null,undoSnapshot=null;
-var pendingCropImage=null,cropStart=null,cropEnd=null,isCropping=false,cropImg=null,cloudSaveTimer=null;
+var pendingCropImage=null,cropStart=null,cropEnd=null,isCropping=false,cropImg=null;
 
 /* ===== UTILS ===== */
 function simpleHash(s){var h=0x811c9dc5;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193);}return('00000000'+(h>>>0).toString(16)).slice(-8);}
@@ -422,142 +409,13 @@ function clamp(v,mn,mx){return Math.max(mn,Math.min(mx,v));}
 function cloneObj(o){return JSON.parse(JSON.stringify(o));}
 function saveUndo(){undoSnapshot=cloneObj(config);}
 
-/* ===== LOCAL STORAGE ===== */
-var SK='promo_page_cfg',PK='promo_page_pwd';
-function loadConfig(){try{var r=localStorage.getItem(SK);if(r){var p=JSON.parse(r);for(var k in DEFAULTS){if(p[k]===undefined)p[k]=DEFAULTS[k];}config=p;}else{config=cloneObj(DEFAULTS);}}catch(e){config=cloneObj(DEFAULTS);}}
-function saveConfig(){try{localStorage.setItem(SK,JSON.stringify(config));}catch(e){toast('Penyimpanan penuh','error');}}
+/* ===== LOCAL STORAGE (hanya untuk override lokal & password) ===== */
+var SK='promo_override',PK='promo_pwd';
+function loadOverride(){try{var r=localStorage.getItem(SK);if(r){var p=JSON.parse(r);for(var k in p){if(p[k]!==undefined)config[k]=p[k];}}return true;}catch(e){return false;}}
+function saveOverride(){try{var o={};for(var k in HARD_CODED){if(config[k]!==HARD_CODED[k])o[k]=config[k];}localStorage.setItem(SK,JSON.stringify(o));}catch(e){}}
+function clearOverride(){localStorage.removeItem(SK);}
 function getPasswordHash(){return localStorage.getItem(PK)||simpleHash('880088');}
 function setPasswordHash(h){localStorage.setItem(PK,h);}
-
-/* ===== CLOUD SYNC (npoint.io) ===== */
-function setSyncStatus(s){
-  var d=document.getElementById('syncDot'),t=document.getElementById('syncText');
-  d.className='sync-dot';
-  if(s==='ok'){t.textContent='Terhubung';}
-  else if(s==='off'){d.classList.add('off');t.textContent='Offline';}
-  else if(s==='loading'){d.classList.add('loading');t.textContent='Sinkronisasi...';}
-  else if(s==='error'){d.classList.add('off');t.textContent='Error';}
-}
-
-/* Ambil ID dari URL npoint (contoh: https://api.npoint.io/abc123 → abc123) */
-function getNpointId(url){
-  if(!url)return '';
-  var parts=url.replace(/\/+$/,'').split('/');
-  return parts[parts.length-1]||'';
-}
-
-/* Buat endpoint read (publik) dan secret (tulis) dari ID */
-function makeReadUrl(id){return 'https://api.npoint.io/'+id;}
-function makeSecretUrl(id){return 'https://api.npoint.io/'+id+'?sign='+simpleHash('promo_'+id+'_write');}
-
-/* Cloud Save: PUT ke Secret URL */
-function cloudSave(){
-  if(!config.cloudSecretUrl){setSyncStatus('off');return Promise.reject(new Error('Secret URL belum ada'));}
-  setSyncStatus('loading');
-  var data=cloneObj(config);
-  data.bgImage=''; /* Jangan kirim base64 ke cloud */
-  data.cloudSecretUrl=''; /* Jangan kirim secret ke cloud */
-  return fetch(config.cloudSecretUrl,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(data)
-  }).then(function(r){
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    setSyncStatus('ok');
-    return true;
-  }).catch(function(e){setSyncStatus('error');throw e;});
-}
-
-/* Cloud Load: GET dari Read URL */
-function cloudLoad(url){
-  var readUrl=url||config.cloudReadUrl;
-  if(!readUrl){setSyncStatus('off');return Promise.reject(new Error('Read URL belum ada'));}
-  setSyncStatus('loading');
-  return fetch(readUrl).then(function(r){
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    return r.json();
-  }).then(function(data){
-    setSyncStatus('ok');
-    /* Jangan timpan kredensial cloud dari server */
-    var savedRead=config.cloudReadUrl,savedSecret=config.cloudSecretUrl;
-    var savedAutoSync=config.cloudAutoSync,savedAutoSave=config.cloudAutoSave;
-    for(var k in DEFAULTS){if(data[k]!==undefined)config[k]=data[k];}
-    config.cloudReadUrl=savedRead;config.cloudSecretUrl=savedSecret;
-    config.cloudAutoSync=savedAutoSync;config.cloudAutoSave=savedAutoSave;
-    saveConfig();render();
-    return true;
-  }).catch(function(e){setSyncStatus('error');throw e;});
-}
-
-/* Buat Cloud Baru */
-function cloudCreate(){
-  setSyncStatus('loading');
-  var createBtn=document.getElementById('btnCreateCloud');
-  createBtn.disabled=true;createBtn.textContent='Membuat...';
-
-  /* POST ke npoint untuk membuat endpoint baru */
-  fetch('https://api.npoint.io/',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({initialized:true})
-  }).then(function(r){
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    return r.json();
-  }).then(function(data){
-    var id=data||(typeof data==='string'?data:'');
-    /* Jika response adalah string langsung (ID) */
-    if(typeof id==='string' && id.length>0){
-      finalizeCloud(id);
-    }
-    /* Jika response adalah object dengan property */
-    else if(id && id.id){finalizeCloud(id.id);}
-    else{
-      /* Fallback: coba parse dari berbagai format response */
-      var text = JSON.stringify(data);
-      var match = text.match(/"[a-f0-9]{8,}"/);
-      if(match) finalizeCloud(match[0].replace(/"/g,''));
-      else throw new Error('Format response tidak dikenali');
-    }
-  }).catch(function(e){
-    setSyncStatus('error');
-    toast('Gagal membuat cloud: '+e.message,'error');
-    createBtn.disabled=false;createBtn.textContent='Buat Cloud Baru (1 klik)';
-  });
-}
-
-function finalizeCloud(id){
-  id=id.replace(/[^a-f0-9]/gi,'');
-  var readUrl=makeReadUrl(id);
-  var secretUrl=makeSecretUrl(id);
-
-  config.cloudReadUrl=readUrl;
-  config.cloudSecretUrl=secretUrl;
-  saveConfig();
-
-  /* Tampilkan info */
-  document.getElementById('cloudSetupArea').style.display='none';
-  document.getElementById('cloudInfoArea').style.display='block';
-  document.getElementById('cloudReadUrl').value=readUrl;
-  document.getElementById('cloudSecretDisplay').textContent=secretUrl;
-
-  setSyncStatus('ok');
-  toast('Cloud berhasil dibuat!','success');
-
-  /* Reset tombol */
-  var createBtn=document.getElementById('btnCreateCloud');
-  createBtn.disabled=false;createBtn.textContent='Buat Cloud Baru Lagi';
-
-  /* Auto-save data awal ke cloud */
-  cloudSave().then(function(){toast('Data awal tersimpan ke cloud','success');}).catch(function(){});
-}
-
-function scheduleCloudSave(){
-  if(!config.cloudAutoSave||!config.cloudSecretUrl)return;
-  clearTimeout(cloudSaveTimer);
-  cloudSaveTimer=setTimeout(function(){
-    cloudSave().then(function(){toast('Tersimpan ke cloud','success');}).catch(function(){});
-  },1500);
-}
 
 /* ===== RENDER ===== */
 function render(){
@@ -608,52 +466,26 @@ function syncUI(){
   else{document.getElementById('urlPreview').style.display='none';}
   if(config.bgImage){document.getElementById('previewImg').src=config.bgImage;document.getElementById('imgPreview').style.display='flex';}
   else{document.getElementById('imgPreview').style.display='none';}
-  document.getElementById('bgPosition').value=config.bgPosition;
-  document.getElementById('bgFit').value=config.bgFit;
-  document.getElementById('bgRepeat').value=config.bgRepeat;
-  document.getElementById('ctaText').value=config.ctaText;
-  document.getElementById('ctaIcon').value=config.ctaIcon;
-  document.getElementById('ctaUrl').value=config.ctaUrl;
-  document.getElementById('ctaTarget').value=config.ctaTarget;
-  document.getElementById('ctaFontSize').value=config.ctaFontSize;
-  document.getElementById('ctaRadius').value=config.ctaRadius;
-  document.getElementById('ctaPaddingV').value=config.ctaPaddingV;
-  document.getElementById('ctaPaddingH').value=config.ctaPaddingH;
-  document.getElementById('ctaPosition').value=config.ctaPosition;
+  document.getElementById('bgPosition').value=config.bgPosition;document.getElementById('bgFit').value=config.bgFit;document.getElementById('bgRepeat').value=config.bgRepeat;
+  document.getElementById('ctaText').value=config.ctaText;document.getElementById('ctaIcon').value=config.ctaIcon;document.getElementById('ctaUrl').value=config.ctaUrl;
+  document.getElementById('ctaTarget').value=config.ctaTarget;document.getElementById('ctaFontSize').value=config.ctaFontSize;document.getElementById('ctaRadius').value=config.ctaRadius;
+  document.getElementById('ctaPaddingV').value=config.ctaPaddingV;document.getElementById('ctaPaddingH').value=config.ctaPaddingH;document.getElementById('ctaPosition').value=config.ctaPosition;
   document.getElementById('ctaEnabled').checked=config.ctaEnabled;
-  document.getElementById('overlayOpacity').value=config.overlayOpacity;
-  document.getElementById('overlayVal').textContent=config.overlayOpacity;
-  document.getElementById('overlayDisp').textContent=config.overlayOpacity+'%';
-  document.getElementById('overlayColor').value=config.overlayColor;
-  document.getElementById('overlayColorHex').value=config.overlayColor;
+  document.getElementById('overlayOpacity').value=config.overlayOpacity;document.getElementById('overlayVal').textContent=config.overlayOpacity;document.getElementById('overlayDisp').textContent=config.overlayOpacity+'%';
+  document.getElementById('overlayColor').value=config.overlayColor;document.getElementById('overlayColorHex').value=config.overlayColor;
   document.getElementById('filterBright').value=config.filterBright;document.getElementById('valBright').textContent=config.filterBright+'%';
   document.getElementById('filterContrast').value=config.filterContrast;document.getElementById('valContrast').textContent=config.filterContrast+'%';
   document.getElementById('filterBlur').value=config.filterBlur;document.getElementById('valBlur').textContent=config.filterBlur+'px';
   document.getElementById('filterGray').value=config.filterGray;document.getElementById('valGray').textContent=config.filterGray+'%';
   document.getElementById('filterSat').value=config.filterSat;document.getElementById('valSat').textContent=config.filterSat+'%';
   document.getElementById('filterOpacity').value=config.filterOpacity;document.getElementById('valOpacity').textContent=config.filterOpacity+'%';
-  document.getElementById('themeSelect').value=config.theme;
-  document.getElementById('themeAuto').checked=config.themeAuto;
+  document.getElementById('themeSelect').value=config.theme;document.getElementById('themeAuto').checked=config.themeAuto;
   document.getElementById('colorAccent').value=config.colorAccent;document.getElementById('colorAccentHex').value=config.colorAccent;
   document.getElementById('colorAccentHover').value=config.colorAccentHover;document.getElementById('colorAccentHoverHex').value=config.colorAccentHover;
   document.getElementById('colorFg').value=config.colorFg;document.getElementById('colorFgHex').value=config.colorFg;
   document.getElementById('colorBg').value=config.colorBg;document.getElementById('colorBgHex').value=config.colorBg;
   document.getElementById('colorMuted').value=config.colorMuted;document.getElementById('colorMutedHex').value=config.colorMuted;
   document.getElementById('secIdle').value=config.idleTimeout;
-  document.getElementById('cloudAutoSync').checked=config.cloudAutoSync;
-  document.getElementById('cloudAutoSave').checked=config.cloudAutoSave;
-
-  /* Cloud info area */
-  if(config.cloudReadUrl){
-    document.getElementById('cloudSetupArea').style.display='none';
-    document.getElementById('cloudInfoArea').style.display='block';
-    document.getElementById('cloudReadUrl').value=config.cloudReadUrl;
-    document.getElementById('cloudSecretDisplay').textContent=config.cloudSecretUrl||'(belum ada - buat cloud baru)';
-  }else{
-    document.getElementById('cloudSetupArea').style.display='block';
-    document.getElementById('cloudInfoArea').style.display='none';
-  }
-  if(config.cloudReadUrl&&config.cloudSecretUrl)setSyncStatus('ok');else setSyncStatus('off');
 }
 
 /* ===== ADMIN ===== */
@@ -684,10 +516,10 @@ document.getElementById('adminClose').addEventListener('click',closeAdmin);
 document.getElementById('adminPanel').addEventListener('click',function(e){if(e.target===this)closeAdmin();});
 
 /* ===== BG MODE ===== */
-document.querySelectorAll('.bg-mode-btn').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.bg-mode-btn').forEach(function(x){x.classList.remove('active');});this.classList.add('active');var m=this.dataset.mode;config.bgMode=m;document.getElementById('bgUrlMode').style.display=m==='url'?'block':'none';document.getElementById('bgUploadMode').style.display=m==='upload'?'block':'none';saveLocalAndSync();render();});});
+document.querySelectorAll('.bg-mode-btn').forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.bg-mode-btn').forEach(function(x){x.classList.remove('active');});this.classList.add('active');config.bgMode=this.dataset.mode;document.getElementById('bgUrlMode').style.display=config.bgMode==='url'?'block':'none';document.getElementById('bgUploadMode').style.display=config.bgMode==='upload'?'block':'none';saveOverride();render();});});
 
 /* ===== URL BG ===== */
-document.getElementById('btnApplyUrl').addEventListener('click',function(){var u=document.getElementById('bgUrl').value.trim();if(!u){toast('Masukkan URL','error');return;}if(!/^https?:\/\/.+/i.test(u)){toast('URL harus http/https','error');return;}saveUndo();config.bgUrl=u;config.bgMode='url';saveLocalAndSync();render();document.getElementById('urlPreviewImg').src=u;document.getElementById('urlPreview').style.display='flex';toast('URL diterapkan','success');});
+document.getElementById('btnApplyUrl').addEventListener('click',function(){var u=document.getElementById('bgUrl').value.trim();if(!u){toast('Masukkan URL','error');return;}if(!/^https?:\/\/.+/i.test(u)){toast('URL harus http/https','error');return;}saveUndo();config.bgUrl=u;config.bgMode='url';saveOverride();render();document.getElementById('urlPreviewImg').src=u;document.getElementById('urlPreview').style.display='flex';toast('URL diterapkan','success');});
 document.getElementById('btnTestUrl').addEventListener('click',function(){var u=document.getElementById('bgUrl').value.trim();if(!u){toast('Masukkan URL','error');return;}toast('Menguji...','info');var img=new Image();img.onload=function(){document.getElementById('urlPreviewImg').src=u;document.getElementById('urlPreview').style.display='flex';toast('Valid! ('+img.naturalWidth+'x'+img.naturalHeight+')','success');};img.onerror=function(){document.getElementById('urlPreview').style.display='none';toast('URL gagal dimuat','error');};img.src=u;});
 document.getElementById('bgUrl').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('btnApplyUrl').click();});
 
@@ -697,8 +529,8 @@ dropzone.addEventListener('dragover',function(e){e.preventDefault();dropzone.cla
 dropzone.addEventListener('dragleave',function(){dropzone.classList.remove('dragover');});
 dropzone.addEventListener('drop',function(e){e.preventDefault();dropzone.classList.remove('dragover');if(e.dataTransfer.files.length>0)handleFile(e.dataTransfer.files[0]);});
 fileInput.addEventListener('change',function(){if(this.files.length>0)handleFile(this.files[0]);this.value='';});
-function handleFile(file){if(!file.type.startsWith('image/')){toast('Bukan gambar','error');return;}if(file.size>5*1024*1024){toast('Maks 5MB','error');return;}var reader=new FileReader();reader.onload=function(e){var d=e.target.result;document.getElementById('previewImg').src=d;document.getElementById('imgPreview').style.display='flex';pendingCropImage=d;saveUndo();config.bgImage=d;config.bgMode='upload';document.querySelectorAll('.bg-mode-btn').forEach(function(b){b.classList.toggle('active',b.dataset.mode==='upload');});document.getElementById('bgUrlMode').style.display='none';document.getElementById('bgUploadMode').style.display='block';saveConfig();render();toast('Diupload (lokal)','success');};reader.readAsDataURL(file);}
-document.getElementById('btnDeleteBg').addEventListener('click',async function(){if(!config.bgImage){toast('Tidak ada gambar lokal','info');return;}var ok=await confirmDialog('Hapus gambar lokal?');if(ok){saveUndo();config.bgImage='';pendingCropImage=null;saveConfig();render();syncUI();toast('Dihapus','success');}});
+function handleFile(file){if(!file.type.startsWith('image/')){toast('Bukan gambar','error');return;}if(file.size>5*1024*1024){toast('Maks 5MB','error');return;}var reader=new FileReader();reader.onload=function(e){var d=e.target.result;document.getElementById('previewImg').src=d;document.getElementById('imgPreview').style.display='flex';pendingCropImage=d;saveUndo();config.bgImage=d;config.bgMode='upload';document.querySelectorAll('.bg-mode-btn').forEach(function(b){b.classList.toggle('active',b.dataset.mode==='upload');});document.getElementById('bgUrlMode').style.display='none';document.getElementById('bgUploadMode').style.display='block';saveOverride();render();toast('Diupload (lokal saja)','success');};reader.readAsDataURL(file);}
+document.getElementById('btnDeleteBg').addEventListener('click',async function(){if(!config.bgImage){toast('Tidak ada gambar lokal','info');return;}var ok=await confirmDialog('Hapus gambar lokal?');if(ok){saveUndo();config.bgImage='';pendingCropImage=null;saveOverride();render();syncUI();toast('Dihapus','success');}});
 
 /* ===== CROP ===== */
 document.getElementById('btnCrop').addEventListener('click',function(){var src=pendingCropImage||config.bgImage;if(!src){toast('Upload dulu','info');return;}var c=document.getElementById('cropCanvas'),ctx=c.getContext('2d'),img=new Image();img.onload=function(){var mw=Math.min(window.innerWidth*.85,600),mh=window.innerHeight*.55,s=Math.min(mw/img.width,mh/img.height,1);c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);ctx.drawImage(img,0,0,c.width,c.height);cropStart=null;cropEnd=null;isCropping=false;document.getElementById('cropModal').classList.add('active');};img.src=src;});
@@ -711,16 +543,13 @@ cropCanvas.addEventListener('mouseup',function(){isCropping=false;});
 cropCanvas.addEventListener('touchstart',function(e){e.preventDefault();var src=pendingCropImage||config.bgImage;if(!src)return;cropImg=new Image();cropImg.src=src;cropStart=getCropPos(e);cropEnd=null;isCropping=true;},{passive:false});
 cropCanvas.addEventListener('touchmove',function(e){e.preventDefault();if(!isCropping||!cropImg)return;cropEnd=getCropPos(e);drawCropOv(cropImg);},{passive:false});
 cropCanvas.addEventListener('touchend',function(){isCropping=false;});
-document.getElementById('btnApplyCrop').addEventListener('click',function(){if(!cropStart||!cropEnd||!cropImg){toast('Pilih area dulu','info');return;}var x=Math.min(cropStart.x,cropEnd.x),y=Math.min(cropStart.y,cropEnd.y),w=Math.abs(cropEnd.x-cropStart.x),h=Math.abs(cropEnd.y-cropStart.y);if(w<5||h<5){toast('Terlalu kecil','error');return;}var img=cropImg,sx=x/cropCanvas.width*img.width,sy=y/cropCanvas.height*img.height,sw=w/cropCanvas.width*img.width,sh=h/cropCanvas.height*img.height,tc=document.createElement('canvas');tc.width=Math.round(sw);tc.height=Math.round(sh);tc.getContext('2d').drawImage(img,sx,sy,sw,sh,0,0,tc.width,tc.height);var cropped=tc.toDataURL('image/jpeg',0.92);saveUndo();config.bgImage=cropped;pendingCropImage=cropped;config.bgMode='upload';saveConfig();render();syncUI();document.getElementById('cropModal').classList.remove('active');toast('Crop diterapkan','success');});
+document.getElementById('btnApplyCrop').addEventListener('click',function(){if(!cropStart||!cropEnd||!cropImg){toast('Pilih area dulu','info');return;}var x=Math.min(cropStart.x,cropEnd.x),y=Math.min(cropStart.y,cropEnd.y),w=Math.abs(cropEnd.x-cropStart.x),h=Math.abs(cropEnd.y-cropStart.y);if(w<5||h<5){toast('Terlalu kecil','error');return;}var img=cropImg,sx=x/cropCanvas.width*img.width,sy=y/cropCanvas.height*img.height,sw=w/cropCanvas.width*img.width,sh=h/cropCanvas.height*img.height,tc=document.createElement('canvas');tc.width=Math.round(sw);tc.height=Math.round(sh);tc.getContext('2d').drawImage(img,sx,sy,sw,sh,0,0,tc.width,tc.height);var cropped=tc.toDataURL('image/jpeg',0.92);saveUndo();config.bgImage=cropped;pendingCropImage=cropped;config.bgMode='upload';saveOverride();render();syncUI();document.getElementById('cropModal').classList.remove('active');toast('Crop diterapkan','success');});
 document.getElementById('btnCancelCrop').addEventListener('click',function(){document.getElementById('cropModal').classList.remove('active');});
 document.getElementById('cropModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('active');});
 
-/* ===== HELPER ===== */
-function saveLocalAndSync(){saveConfig();scheduleCloudSave();}
-
 /* ===== FIELD BINDINGS ===== */
-function bindField(id,key,parser){var el=document.getElementById(id);el.addEventListener('input',function(){config[key]=parser?parser(this.value):this.value;render();});el.addEventListener('change',function(){saveUndo();config[key]=parser?parser(this.value):this.value;saveLocalAndSync();});}
-function bindSelect(id,key){var el=document.getElementById(id);el.addEventListener('change',function(){saveUndo();config[key]=this.value;saveLocalAndSync();render();});}
+function bindField(id,key,parser){var el=document.getElementById(id);el.addEventListener('input',function(){config[key]=parser?parser(this.value):this.value;render();});el.addEventListener('change',function(){saveUndo();config[key]=parser?parser(this.value):this.value;saveOverride();});}
+function bindSelect(id,key){var el=document.getElementById(id);el.addEventListener('change',function(){saveUndo();config[key]=this.value;saveOverride();render();});}
 bindSelect('bgPosition','bgPosition');bindSelect('bgFit','bgFit');bindSelect('bgRepeat','bgRepeat');
 bindField('ctaText','ctaText',null);bindField('ctaIcon','ctaIcon',null);bindField('ctaUrl','ctaUrl',null);
 bindSelect('ctaTarget','ctaTarget');
@@ -729,77 +558,94 @@ bindField('ctaRadius','ctaRadius',function(v){return clamp(parseInt(v)||14,0,50)
 bindField('ctaPaddingV','ctaPaddingV',function(v){return clamp(parseInt(v)||14,6,40);});
 bindField('ctaPaddingH','ctaPaddingH',function(v){return clamp(parseInt(v)||32,12,60);});
 bindSelect('ctaPosition','ctaPosition');
-document.getElementById('ctaEnabled').addEventListener('change',function(){saveUndo();config.ctaEnabled=this.checked;saveLocalAndSync();render();});
+document.getElementById('ctaEnabled').addEventListener('change',function(){saveUndo();config.ctaEnabled=this.checked;saveOverride();render();});
 document.getElementById('ctaText').addEventListener('blur',function(){if(!this.value.trim()){this.value='Kunjungi Website';config.ctaText='Kunjungi Website';render();}});
 
 /* Overlay */
 document.getElementById('overlayOpacity').addEventListener('input',function(){config.overlayOpacity=parseInt(this.value);document.getElementById('overlayVal').textContent=this.value;document.getElementById('overlayDisp').textContent=this.value+'%';render();});
-document.getElementById('overlayOpacity').addEventListener('change',function(){saveUndo();saveLocalAndSync();});
+document.getElementById('overlayOpacity').addEventListener('change',function(){saveUndo();saveOverride();});
 document.getElementById('overlayColor').addEventListener('input',function(){config.overlayColor=this.value;document.getElementById('overlayColorHex').value=this.value;render();});
-document.getElementById('overlayColor').addEventListener('change',function(){saveUndo();saveLocalAndSync();});
+document.getElementById('overlayColor').addEventListener('change',function(){saveUndo();saveOverride();});
 document.getElementById('overlayColorHex').addEventListener('input',function(){if(/^#[0-9a-fA-F]{6}$/.test(this.value)){config.overlayColor=this.value;document.getElementById('overlayColor').value=this.value;render();}});
-document.getElementById('overlayColorHex').addEventListener('change',function(){saveUndo();saveLocalAndSync();});
-document.querySelectorAll('[data-overlay]').forEach(function(b){b.addEventListener('click',function(){saveUndo();config.overlayColor=this.dataset.overlay;document.getElementById('overlayColor').value=this.dataset.overlay;document.getElementById('overlayColorHex').value=this.dataset.overlay;saveLocalAndSync();render();});});
+document.getElementById('overlayColorHex').addEventListener('change',function(){saveUndo();saveOverride();});
+document.querySelectorAll('[data-overlay]').forEach(function(b){b.addEventListener('click',function(){saveUndo();config.overlayColor=this.dataset.overlay;document.getElementById('overlayColor').value=this.dataset.overlay;document.getElementById('overlayColorHex').value=this.dataset.overlay;saveOverride();render();});});
 
 /* Filter */
-function bindFilter(id,vid,suf,ck){var el=document.getElementById(id),vl=document.getElementById(vid);el.addEventListener('input',function(){config[ck]=parseInt(this.value);vl.textContent=this.value+suf;render();});el.addEventListener('change',function(){saveUndo();saveLocalAndSync();});}
+function bindFilter(id,vid,suf,ck){var el=document.getElementById(id),vl=document.getElementById(vid);el.addEventListener('input',function(){config[ck]=parseInt(this.value);vl.textContent=this.value+suf;render();});el.addEventListener('change',function(){saveUndo();saveOverride();});}
 bindFilter('filterBright','valBright','%','filterBright');bindFilter('filterContrast','valContrast','%','filterContrast');bindFilter('filterBlur','valBlur','px','filterBlur');bindFilter('filterGray','valGray','%','filterGray');bindFilter('filterSat','valSat','%','filterSat');bindFilter('filterOpacity','valOpacity','%','filterOpacity');
-document.getElementById('btnResetFilter').addEventListener('click',function(){saveUndo();config.filterBright=DEFAULTS.filterBright;config.filterContrast=DEFAULTS.filterContrast;config.filterBlur=DEFAULTS.filterBlur;config.filterGray=DEFAULTS.filterGray;config.filterSat=DEFAULTS.filterSat;config.filterOpacity=DEFAULTS.filterOpacity;saveLocalAndSync();render();syncUI();toast('Filter direset','success');});
+document.getElementById('btnResetFilter').addEventListener('click',function(){saveUndo();config.filterBright=HARD_CODED.filterBright;config.filterContrast=HARD_CODED.filterContrast;config.filterBlur=HARD_CODED.filterBlur;config.filterGray=HARD_CODED.filterGray;config.filterSat=HARD_CODED.filterSat;config.filterOpacity=HARD_CODED.filterOpacity;saveOverride();render();syncUI();toast('Filter direset','success');});
 
 /* Tema */
 bindSelect('themeSelect','theme');
-document.getElementById('themeAuto').addEventListener('change',function(){saveUndo();config.themeAuto=this.checked;saveLocalAndSync();render();});
+document.getElementById('themeAuto').addEventListener('change',function(){saveUndo();config.themeAuto=this.checked;saveOverride();render();});
 window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',function(){if(config.themeAuto)render();});
 
 /* Warna */
-function bindColor(pid,hid,ck){var p=document.getElementById(pid),h=document.getElementById(hid);p.addEventListener('input',function(){config[ck]=this.value;h.value=this.value;render();});p.addEventListener('change',function(){saveUndo();saveLocalAndSync();});h.addEventListener('input',function(){if(/^#[0-9a-fA-F]{6}$/.test(this.value)){config[ck]=this.value;p.value=this.value;render();}});h.addEventListener('change',function(){saveUndo();saveLocalAndSync();});}
+function bindColor(pid,hid,ck){var p=document.getElementById(pid),h=document.getElementById(hid);p.addEventListener('input',function(){config[ck]=this.value;h.value=this.value;render();});p.addEventListener('change',function(){saveUndo();saveOverride();});h.addEventListener('input',function(){if(/^#[0-9a-fA-F]{6}$/.test(this.value)){config[ck]=this.value;p.value=this.value;render();}});h.addEventListener('change',function(){saveUndo();saveOverride();});}
 bindColor('colorAccent','colorAccentHex','colorAccent');bindColor('colorAccentHover','colorAccentHoverHex','colorAccentHover');bindColor('colorFg','colorFgHex','colorFg');bindColor('colorBg','colorBgHex','colorBg');bindColor('colorMuted','colorMutedHex','colorMuted');
-document.getElementById('btnResetColors').addEventListener('click',async function(){var ok=await confirmDialog('Reset warna?');if(ok){saveUndo();config.colorAccent=DEFAULTS.colorAccent;config.colorAccentHover=DEFAULTS.colorAccentHover;config.colorFg=DEFAULTS.colorFg;config.colorBg=DEFAULTS.colorBg;config.colorMuted=DEFAULTS.colorMuted;saveLocalAndSync();render();syncUI();toast('Warna direset','success');}});
+document.getElementById('btnResetColors').addEventListener('click',async function(){var ok=await confirmDialog('Reset warna?');if(ok){saveUndo();config.colorAccent=HARD_CODED.colorAccent;config.colorAccentHover=HARD_CODED.colorAccentHover;config.colorFg=HARD_CODED.colorFg;config.colorBg=HARD_CODED.colorBg;config.colorMuted=HARD_CODED.colorMuted;saveOverride();render();syncUI();toast('Warna direset','success');}});
 
-/* ===== CLOUD TAB ===== */
-document.getElementById('btnCreateCloud').addEventListener('click',cloudCreate);
-document.getElementById('btnCloudSave').addEventListener('click',function(){if(!config.cloudSecretUrl){toast('Buat cloud dulu','error');return;}cloudSave().then(function(){toast('Tersimpan ke cloud!','success');}).catch(function(e){toast('Gagal: '+e.message,'error');});});
-document.getElementById('btnCloudLoad').addEventListener('click',function(){if(!config.cloudReadUrl){toast('Buat cloud dulu','error');return;}cloudLoad().then(function(){toast('Berhasil diambil dari cloud!','success');syncUI();}).catch(function(e){toast('Gagal: '+e.message,'error');});});
-document.getElementById('cloudAutoSync').addEventListener('change',function(){config.cloudAutoSync=this.checked;saveConfig();});
-document.getElementById('cloudAutoSave').addEventListener('change',function(){config.cloudAutoSave=this.checked;saveConfig();});
-document.getElementById('btnCopySecret').addEventListener('click',function(){var url=config.cloudSecretUrl;if(!url){toast('Secret URL belum ada','error');return;}navigator.clipboard.writeText(url).then(function(){toast('Secret URL dicopy!','success');}).catch(function(){toast('Gagal copy','error');});});
-document.getElementById('btnPasteSecret').addEventListener('click',function(){navigator.clipboard.readText().then(function(text){if(!text||!text.includes('npoint.io')){toast('Clipboard tidak berisi URL npoint','error');return;}config.cloudSecretUrl=text.trim();config.cloudReadUrl=text.trim().split('?')[0];saveConfig();syncUI();toast('Secret URL diterapkan!','success');}).catch(function(){toast('Gagal membaca clipboard. Paste manual di field Read URL.','error');});});
+/* ===== EXPORT KODE ===== */
+function generateCode(){
+  var lines=['var HARD_CODED = {'];
+  var keys=Object.keys(HARD_CODED);
+  for(var i=0;i<keys.length;i++){
+    var k=keys[i],v=config[k];
+    var comma=i<keys.length-1?',':'';
+    if(typeof v==='string'){lines.push('  '+k+': \''+v.replace(/'/g,"\\'")+'\''+comma);}
+    else if(typeof v==='boolean'){lines.push('  '+k+': '+v+comma);}
+    else{lines.push('  '+k+': '+v+comma);}
+  }
+  lines.push('};');
+  return lines.join('\n');
+}
+
+document.getElementById('btnGenCode').addEventListener('click',function(){
+  var code=generateCode();
+  var el=document.getElementById('codeOutput');
+  /* Syntax highlight sederhana */
+  var html=code
+    .replace(/(var HARD_CODED)/g,'<span style="color:var(--fg);font-weight:700">$1</span>')
+    .replace(/(\w+):/g,'<span class="ck">$1</span>:')
+    .replace(/: '([^']*)'/g,': <span class="cv">\'$1\'</span>')
+    .replace(/: (true|false)/g,': <span style="color:#e06c75">$1</span>')
+    .replace(/: (\d+)/g,': <span style="color:#d19a66">$1</span>');
+  el.innerHTML=html;
+  toast('Kode di-generate! Copy lalu paste di file HTML','success');
+});
+
+document.getElementById('btnCopyCode').addEventListener('click',function(){
+  var code=generateCode();
+  navigator.clipboard.writeText(code).then(function(){toast('Kode dicopy ke clipboard!','success');}).catch(function(){toast('Gagal copy','error');});
+});
+
+/* ===== BACKUP ===== */
+document.getElementById('btnExportJson').addEventListener('click',function(){var d=cloneObj(config);d.bgImage='';var b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='promo-config.json';a.click();URL.revokeObjectURL(u);toast('Export berhasil','success');});
+document.getElementById('btnImportJson').addEventListener('click',function(){document.getElementById('importFile').click();});
+document.getElementById('importFile').addEventListener('change',function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){try{var d=JSON.parse(e.target.result);saveUndo();for(var k in HARD_CODED){if(d[k]!==undefined)config[k]=d[k];}saveOverride();render();syncUI();toast('Import berhasil','success');}catch(err){toast('JSON tidak valid','error');}};r.readAsText(f);this.value='';});
+document.getElementById('btnFactoryReset').addEventListener('click',async function(){var ok=await confirmDialog('Reset ke default? Semua perubahan hilang.');if(ok){saveUndo();config=cloneObj(HARD_CODED);pendingCropImage=null;clearOverride();saveOverride();render();syncUI();toast('Reset berhasil','success');}});
+document.getElementById('btnUndo').addEventListener('click',function(){if(!undoSnapshot){toast('Tidak bisa undo','info');return;}config=cloneObj(undoSnapshot);pendingCropImage=config.bgImage;undoSnapshot=null;saveOverride();render();syncUI();toast('Undo berhasil','success');});
 
 /* ===== KEAMANAN ===== */
 document.getElementById('btnChangePass').addEventListener('click',function(){var o=document.getElementById('secOldPass').value,n=document.getElementById('secNewPass').value,c=document.getElementById('secConfPass').value;if(!o||!n||!c){toast('Semua field harus diisi','error');return;}if(simpleHash(o)!==getPasswordHash()){toast('Password lama salah','error');return;}if(n.length<4){toast('Min 4 karakter','error');return;}if(n!==c){toast('Konfirmasi tidak cocok','error');return;}setPasswordHash(simpleHash(n));document.getElementById('secOldPass').value='';document.getElementById('secNewPass').value='';document.getElementById('secConfPass').value='';toast('Password diubah','success');});
-document.getElementById('secIdle').addEventListener('change',function(){config.idleTimeout=clamp(parseInt(this.value)||0,0,120);saveConfig();resetIdleTimer();});
+document.getElementById('secIdle').addEventListener('change',function(){config.idleTimeout=clamp(parseInt(this.value)||0,0,120);saveOverride();resetIdleTimer();});
 document.getElementById('btnLogout').addEventListener('click',doLogout);
-
-/* ===== BACKUP ===== */
-document.getElementById('btnExport').addEventListener('click',function(){var d=cloneObj(config);d.bgImage='';d.cloudSecretUrl='';var b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='promo-config.json';a.click();URL.revokeObjectURL(u);toast('Export berhasil','success');});
-document.getElementById('btnImport').addEventListener('click',function(){document.getElementById('importFile').click();});
-document.getElementById('importFile').addEventListener('change',function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){try{var d=JSON.parse(e.target.result);saveUndo();var sr=config.cloudReadUrl,ss=config.cloudSecretUrl,sas=config.cloudAutoSync,sa=config.cloudAutoSave;for(var k in DEFAULTS){if(d[k]!==undefined&&k!=='bgImage'&&k!=='cloudSecretUrl')config[k]=d[k];}config.cloudReadUrl=sr;config.cloudSecretUrl=ss;config.cloudAutoSync=sas;config.cloudAutoSave=sa;saveLocalAndSync();render();syncUI();toast('Import berhasil','success');}catch(err){toast('JSON tidak valid','error');}};r.readAsText(f);this.value='';});
-document.getElementById('btnBackup').addEventListener('click',function(){var b=new Blob([JSON.stringify(config)],{type:'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='promo-backup.json';a.click();URL.revokeObjectURL(u);toast('Backup berhasil','success');});
-document.getElementById('btnRestore').addEventListener('click',function(){document.getElementById('restoreFile').click();});
-document.getElementById('restoreFile').addEventListener('change',function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=async function(e){try{var d=JSON.parse(e.target.result);var ok=await confirmDialog('Restore backup?');if(ok){saveUndo();for(var k in DEFAULTS){if(d[k]!==undefined)config[k]=d[k];}pendingCropImage=config.bgImage;saveConfig();render();syncUI();toast('Restore berhasil','success');}}catch(err){toast('File tidak valid','error');}};r.readAsText(f);this.value='';});
-document.getElementById('btnFactoryReset').addEventListener('click',async function(){var ok=await confirmDialog('Reset factory? Semua data hilang.');if(ok){saveUndo();config=cloneObj(DEFAULTS);pendingCropImage=null;localStorage.removeItem(SK);localStorage.removeItem(PK);saveConfig();render();syncUI();toast('Factory reset berhasil','success');}});
-document.getElementById('btnUndo').addEventListener('click',function(){if(!undoSnapshot){toast('Tidak bisa undo','info');return;}config=cloneObj(undoSnapshot);pendingCropImage=config.bgImage;undoSnapshot=null;saveLocalAndSync();render();syncUI();toast('Undo berhasil','success');});
 
 /* CTA guard */
 document.getElementById('ctaBtn').addEventListener('click',function(e){if(!config.ctaEnabled){e.preventDefault();return;}if(!config.ctaUrl||config.ctaUrl==='#'){e.preventDefault();toast('URL belum diatur','info');return;}});
 
 /* ===== INIT ===== */
 (function init(){
-  loadConfig();
-  pendingCropImage=config.bgImage;
+  /* Mulai dari hardcoded config */
+  config = cloneObj(HARD_CODED);
+  /* Terapkan override dari LocalStorage (jika ada) */
+  loadOverride();
+  pendingCropImage = config.bgImage || null;
   render();
 
-  if(config.cloudAutoSync && config.cloudReadUrl){
-    cloudLoad().then(function(){
-      document.getElementById('loadingScreen').classList.add('hidden');
-    }).catch(function(){
-      document.getElementById('loadingScreen').classList.add('hidden');
-    });
-  } else {
-    setTimeout(function(){
-      document.getElementById('loadingScreen').classList.add('hidden');
-    }, 400);
-  }
+  setTimeout(function(){
+    document.getElementById('loadingScreen').classList.add('hidden');
+  }, 400);
 })();
 </script>
 </body>
